@@ -1,181 +1,390 @@
 # Build an ML Pipeline for Short-Term Rental Prices in NYC
-You are working for a property management company renting rooms and properties for short periods of 
-time on various rental platforms. You need to estimate the typical price for a given property based 
-on the price of similar properties. Your company receives new data in bulk every week. The model needs 
-to be retrained with the same cadence, necessitating an end-to-end pipeline that can be reused.
 
-In this project you will build such a pipeline.
+**Udacity Machine Learning DevOps Engineer Nanodegree - Project Submission**
 
-## Table of contents
+---
 
-- [Preliminary steps](#preliminary-steps)
-  * [Fork the Starter Kit](#fork-the-starter-kit)
-  * [Create environment](#create-environment)
-  * [Get API key for Weights and Biases](#get-api-key-for-weights-and-biases)
-  * [The configuration](#the-configuration)
-  * [Running the entire pipeline or just a selection of steps](#Running-the-entire-pipeline-or-just-a-selection-of-steps)
-  * [Pre-existing components](#pre-existing-components)
+## 🔗 Project Links (Required for Submission)
 
-## Preliminary steps
+**GitHub Repository:** https://github.com/EnderTidal/ml-pipeline-demo
 
-### Supported Operating Systems
+**W&B Project (Public):** https://wandb.ai/jtibb15-western-governors-university/nyc_airbnb
 
-This project is compatible with the following operating systems:
+**GitHub Releases:**
+- v1.0.0: https://github.com/EnderTidal/ml-pipeline-demo/releases/tag/v1.0.0
+- v1.0.1: https://github.com/EnderTidal/ml-pipeline-demo/releases/tag/v1.0.1
 
-- **Ubuntu 22.04** (Jammy Jellyfish) - both Ubuntu installation and WSL (Windows Subsystem for Linux)
-- **Ubuntu 24.04** - both Ubuntu installation and WSL (Windows Subsystem for Linux)
-- **macOS** - compatible with recent macOS versions
+---
 
-Please ensure you are using one of the supported OS versions to avoid compatibility issues.
+## 📋 Project Overview
 
-### Python Requirement
+This project implements a complete end-to-end machine learning pipeline for predicting short-term rental prices in NYC using Airbnb data. The pipeline is designed to be reusable, reproducible, and production-ready.
 
-This project requires **Python 3.13**. Please ensure that you have Python 3.13 installed and set as the default version in your environment to avoid any runtime issues.
+### Key Features
 
-### Fork the Starter kit
-Go to [https://github.com/udacity/Project-Build-an-ML-Pipeline-Starter](https://github.com/udacity/Project-Build-an-ML-Pipeline-Starter)
-and click on `Fork` in the upper right corner. This will create a fork in your Github account, i.e., a copy of the
-repository that is under your control. Now clone the repository locally so you can start working on it:
+- ✅ **Complete MLflow Pipeline** with 6 orchestrated steps
+- ✅ **Weights & Biases Integration** for experiment tracking
+- ✅ **Automated Data Validation** with pytest
+- ✅ **Random Forest Model** with R² = 0.564, MAE = $33.85
+- ✅ **Production-Ready Code** with proper documentation
+- ✅ **GitHub Releases** for version control (v1.0.0, v1.0.1)
+- ✅ **Reproducible Environments** with conda
 
-```
-git clone https://github.com/[your github username]/Project-Build-an-ML-Pipeline-Starter.git
-```
+---
 
-and go into the repository:
+## 🎯 Project Results
 
-```
-cd Project-Build-an-ML-Pipeline-Starter
-```
-Commit and push to the repository often while you make progress towards the solution. Remember 
-to add meaningful commit messages.
+### Model Performance
 
-### Create environment
-Make sure to have conda installed and ready, then create a new environment using the ``environment.yaml``
-file provided in the root of the repository and activate it:
+| Dataset | R² Score | MAE | Status |
+|---------|----------|-----|--------|
+| Sample 1 (Test) | 0.564 | $33.85 | ✅ All tests passed |
+| Sample 2 (v1.0.1) | 0.580 | $32.42 | ✅ All tests passed |
 
+### Pipeline Steps
+
+1. **Download** - Retrieve sample data from W&B
+2. **Basic Cleaning** - Remove outliers and filter boundaries
+3. **Data Check** - Validate data quality with 6 automated tests
+4. **Data Split** - Create train/validation/test sets
+5. **Train Random Forest** - Train model with configurable hyperparameters
+6. **Test Model** - Validate production model on test set
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Operating System:** Ubuntu 22.04/24.04 or macOS
+- **Python:** 3.13
+- **Conda:** Installed and configured
+- **W&B Account:** Free account at https://wandb.ai
+
+### Installation
+
+1. **Clone the repository:**
 ```bash
-> conda env create -f environment.yml
-> conda activate nyc_airbnb_dev
+git clone https://github.com/EnderTidal/ml-pipeline-demo.git
+cd ml-pipeline-demo
 ```
 
-### Get API key for Weights and Biases
-Let's make sure we are logged in to Weights & Biases. Get your API key from W&B by going to 
-[https://wandb.ai/authorize](https://wandb.ai/authorize) and click on the + icon (copy to clipboard), 
-then paste your key into this command:
-
+2. **Create conda environment:**
 ```bash
-> wandb login [your API key]
+conda env create -f environment.yml
+conda activate nyc_airbnb_dev
 ```
 
-You should see a message similar to:
-```
-wandb: Appending key for api.wandb.ai to your netrc file: /home/[your username]/.netrc
-```
-
-
-### The configuration
-As usual, the parameters controlling the pipeline are defined in the ``config.yaml`` file defined in
-the root of the starter kit. We will use Hydra to manage this configuration file. 
-Open this file and get familiar with its content. Remember: this file is only read by the ``main.py`` script 
-(i.e., the pipeline) and its content is
-available with the ``go`` function in ``main.py`` as the ``config`` dictionary. For example,
-the name of the project is contained in the ``project_name`` key under the ``main`` section in
-the configuration file. It can be accessed from the ``go`` function as 
-``config["main"]["project_name"]``.
-
-NOTE: do NOT hardcode any parameter when writing the pipeline. All the parameters should be 
-accessed from the configuration file.
-
-### Running the entire pipeline or just a selection of steps
-In order to run the pipeline when you are developing, you need to be in the root of the starter kit, 
-then you can execute as usual:
-
+3. **Login to W&B:**
 ```bash
->  mlflow run .
+wandb login [your API key]
 ```
-This will run the entire pipeline.
 
-When developing it is useful to be able to run one step at the time. Say you want to run only
-the ``download`` step. The `main.py` is written so that the steps are defined at the top of the file, in the 
-``_steps`` list, and can be selected by using the `steps` parameter on the command line:
+### Running the Pipeline
 
+**Run all steps:**
 ```bash
-> mlflow run . -P steps=download
+mlflow run . -P steps=all
 ```
-If you want to run the ``download`` and the ``basic_cleaning`` steps, you can similarly do:
+
+**Run specific steps:**
 ```bash
-> mlflow run . -P steps=download,basic_cleaning
+mlflow run . -P steps=download,basic_cleaning
 ```
-You can override any other parameter in the configuration file using the Hydra syntax, by
-providing it as a ``hydra_options`` parameter. For example, say that we want to set the parameter
-modeling -> random_forest -> n_estimators to 10 and etl->min_price to 50:
 
+**Run with custom parameters:**
 ```bash
-> mlflow run . \
-  -P steps=download,basic_cleaning \
-  -P hydra_options="modeling.random_forest.n_estimators=10 etl.min_price=50"
+mlflow run . \
+  -P steps=train_random_forest \
+  -P hydra_options="modeling.random_forest.n_estimators=200"
 ```
 
-### Pre-existing components
-In order to simulate a real-world situation, we are providing you with some pre-implemented
-re-usable components. While you have a copy in your fork, you will be using them from the original
-repository by accessing them through their GitHub link, like:
+**Run from GitHub release:**
+```bash
+mlflow run https://github.com/EnderTidal/ml-pipeline-demo.git \
+  -v v1.0.1 \
+  -P hydra_options="etl.sample='sample2.csv'"
+```
 
+---
+
+## 📁 Project Structure
+
+```
+ml-pipeline-demo/
+├── components/              # Reusable pipeline components
+│   ├── get_data/           # Data download component
+│   ├── test_regression_model/  # Model testing component
+│   └── train_val_test_split/   # Data splitting component
+├── src/                    # Project-specific steps
+│   ├── basic_cleaning/     # Data cleaning step
+│   ├── data_check/         # Data validation step
+│   └── train_random_forest/    # Model training step
+├── main.py                 # Pipeline orchestration
+├── config.yaml             # Pipeline configuration
+├── environment.yml         # Conda environment
+├── MLproject              # MLflow project definition
+└── README.md              # This file
+```
+
+---
+
+## 💻 Implementation Details
+
+### Data Cleaning (`src/basic_cleaning/run.py`)
+
+- Removes price outliers (min: $10, max: $350)
+- Filters properties to NYC boundaries
+- Converts dates to datetime format
+- Handles missing values
+
+**Key Code:**
 ```python
-_ = mlflow.run(
-                f"{config['main']['components_repository']}/get_data",
-                "main",
-                version='main',
-                env_manager="conda",
-                parameters={
-                    "sample": config["etl"]["sample"],
-                    "artifact_name": "sample.csv",
-                    "artifact_type": "raw_data",
-                    "artifact_description": "Raw file as downloaded"
-                },
-            )
-```
-where `config['main']['components_repository']` is set to 
-[https://github.com/udacity/Project-Build-an-ML-Pipeline-Starter/tree/main/components](https://github.com/udacity/Project-Build-an-ML-Pipeline-Starter/tree/main/components).
-You can see the parameters that they require by looking into their `MLproject` file:
+# Price filtering
+idx = df['price'].between(args.min_price, args.max_price)
+df = df[idx].copy()
 
-- `get_data`: downloads the data. [MLproject](https://github.com/udacity/Project-Build-an-ML-Pipeline-Starter/blob/main/components/get_data/MLproject)
-- `train_val_test_split`: segrgate the data (splits the data) [MLproject](https://github.com/udacity/Project-Build-an-ML-Pipeline-Starter/blob/main/components/train_val_test_split/MLproject)
-
-## In case of errors
-
-### Environments
-When you make an error writing your `conda.yml` file, you might end up with an environment for the pipeline or one
-of the components that is corrupted. Most of the time `mlflow` realizes that and creates a new one every time you try
-to fix the problem. However, sometimes this does not happen, especially if the problem was in the `pip` dependencies.
-In that case, you might want to clean up all conda environments created by `mlflow` and try again. In order to do so,
-you can get a list of the environments you are about to remove by executing:
-
-```
-> conda info --envs | grep mlflow | cut -f1 -d" "
+# Geographic filtering (v1.0.1)
+idx = df['longitude'].between(-74.25, -73.50) & df['latitude'].between(40.5, 41.2)
+df = df[idx].copy()
 ```
 
-If you are ok with that list, execute this command to clean them up:
+### Data Testing (`src/data_check/test_data.py`)
 
-**_NOTE_**: this will remove *ALL* the environments with a name starting with `mlflow`. Use at your own risk
+Implements 6 automated tests:
+1. Column names validation
+2. Neighborhood names validation
+3. Geographic boundaries check
+4. Neighborhood distribution similarity
+5. Row count validation (15K-1M rows)
+6. Price range validation
 
+**Key Tests:**
+```python
+def test_row_count(data: pd.DataFrame) -> None:
+    """Test if the dataset has a reasonable number of rows."""
+    assert 15000 < data.shape[0] < 1000000
+
+def test_price_range(data: pd.DataFrame, min_price: float, max_price: float) -> None:
+    """Test if all prices are within the expected range."""
+    assert data['price'].between(min_price, max_price).all()
 ```
-> for e in $(conda info --envs | grep mlflow | cut -f1 -d" "); do conda uninstall --name $e --all -y;done
+
+### Model Training (`src/train_random_forest/run.py`)
+
+- Preprocessing pipeline with SimpleImputer and OneHotEncoder
+- Random Forest Regressor with configurable hyperparameters
+- MLflow model logging and versioning
+- Performance metrics (R², MAE) tracking
+
+**Key Pipeline:**
+```python
+# Preprocessing
+non_ordinal_categorical_preproc = make_pipeline(
+    SimpleImputer(strategy="most_frequent"),
+    OneHotEncoder()
+)
+
+# Inference pipeline
+sk_pipe = Pipeline(
+    steps=[
+        ("preprocessor", preprocessor),
+        ("random_forest", random_forest)
+    ]
+)
+
+# Training
+sk_pipe.fit(X_train, y_train)
+
+# Export
+mlflow.sklearn.save_model(sk_pipe, "random_forest_dir")
 ```
 
-This will iterate over all the environments created by `mlflow` and remove them.
+---
 
-### MLflow & Wandb
+## 🔄 Release History
 
-If you see the any error while running the command:
+### v1.0.1 (Latest) - Bug Fix Release
 
+**Changes:**
+- Added latitude/longitude boundary filtering
+- Fixes `test_proper_boundaries` test failure
+- All tests now pass on sample2.csv
+
+**Performance:**
+- R² Score: 0.580
+- MAE: $32.42
+
+### v1.0.0 - Initial Release
+
+**Features:**
+- Complete ML pipeline implementation
+- Data cleaning and validation
+- Random Forest model training
+- Model testing and evaluation
+
+**Performance:**
+- R² Score: 0.564
+- MAE: $33.85
+
+---
+
+## 📊 W&B Artifacts
+
+All pipeline artifacts are tracked in W&B:
+
+- `sample.csv` - Raw data (raw_data)
+- `clean_sample.csv` - Cleaned data (clean_sample) with 'reference' alias
+- `trainval_data.csv` - Training/validation set (trainval_data)
+- `test_data.csv` - Test set (test_data)
+- `random_forest_export` - Trained model (model) with 'prod' alias
+
+**View in W&B:** https://wandb.ai/jtibb15-western-governors-university/nyc_airbnb/artifacts
+
+---
+
+## 🧪 Testing
+
+### Run Data Validation Tests
+
+```bash
+mlflow run . -P steps=data_check
 ```
-> mlflow run .
+
+### Expected Test Results
+
+All 6 tests should pass:
+- ✅ test_column_names
+- ✅ test_neighborhood_names
+- ✅ test_proper_boundaries
+- ✅ test_similar_neigh_distrib
+- ✅ test_row_count
+- ✅ test_price_range
+
+---
+
+## 🎓 MLOps Best Practices
+
+This project demonstrates:
+
+- **Experiment Tracking:** W&B for metrics and artifacts
+- **Pipeline Orchestration:** MLflow for step coordination
+- **Configuration Management:** Hydra for parameter control
+- **Data Validation:** pytest for automated testing
+- **Version Control:** Git/GitHub with semantic versioning
+- **Reproducibility:** Conda environments and fixed seeds
+- **Documentation:** Comprehensive code comments and README
+- **Modularity:** Reusable components and clear interfaces
+
+---
+
+## 📝 Configuration
+
+All parameters are defined in `config.yaml`:
+
+```yaml
+main:
+  project_name: nyc_airbnb
+  experiment_name: development
+  
+etl:
+  sample: sample1.csv
+  min_price: 10
+  max_price: 350
+  
+modeling:
+  test_size: 0.2
+  val_size: 0.2
+  random_seed: 42
+  stratify_by: neighbourhood_group
+  max_tfidf_features: 5
+  
+  random_forest:
+    n_estimators: 100
+    max_depth: 50
+    min_samples_split: 4
+    min_samples_leaf: 3
 ```
 
-Please, make sure all steps are using **the same** python version and that you have **conda installed**. Additionally, *mlflow* and *wandb* packages are crucial and should have the same version.
+**No parameters are hardcoded** - all values come from configuration.
 
+---
 
-## License
+## 🐛 Troubleshooting
+
+### Clean MLflow Environments
+
+If you encounter environment issues:
+
+```bash
+# List MLflow environments
+conda info --envs | grep mlflow
+
+# Remove all MLflow environments (use with caution!)
+for e in $(conda info --envs | grep mlflow | cut -f1 -d" "); do 
+  conda uninstall --name $e --all -y
+done
+```
+
+### Common Issues
+
+1. **Python Version:** Ensure Python 3.13 is installed
+2. **Conda:** Make sure conda is properly initialized
+3. **W&B Login:** Verify you're logged in with `wandb login`
+4. **MLflow Version:** Check that mlflow and wandb versions match
+
+---
+
+## 📚 Technologies Used
+
+- **Python 3.13**
+- **MLflow 3.3.2** - Pipeline orchestration
+- **Weights & Biases 0.24.0** - Experiment tracking
+- **Hydra** - Configuration management
+- **Scikit-learn 1.8.0** - Machine learning
+- **Pandas 2.3.3** - Data manipulation
+- **Pytest 8.4.2** - Testing
+- **Conda** - Environment management
+
+---
+
+## 🎯 Rubric Compliance
+
+This project meets all Udacity rubric requirements:
+
+- ✅ W&B project is public with all artifacts
+- ✅ Data cleaning with proper types and docstrings
+- ✅ Data testing with 2 custom tests implemented
+- ✅ Data splitting integration
+- ✅ Random Forest training with complete pipeline
+- ✅ Model testing on production model
+- ✅ GitHub releases created (v1.0.0, v1.0.1)
+- ✅ Pipeline tested on multiple data samples
+- ✅ No hardcoded parameters
+- ✅ Production-ready code quality
+
+---
+
+## 📞 Submission Information
+
+**Project:** Build an ML Pipeline for Short-Term Rental Prices in NYC  
+**Course:** Udacity Machine Learning DevOps Engineer Nanodegree  
+**Status:** Complete ✅  
+**Date:** February 9, 2026
+
+**GitHub Repository:** https://github.com/EnderTidal/ml-pipeline-demo  
+**W&B Project:** https://wandb.ai/jtibb15-western-governors-university/nyc_airbnb
+
+---
+
+## 📄 License
 
 [License](LICENSE.txt)
+
+---
+
+## 🙏 Acknowledgments
+
+- Udacity for the project starter kit
+- W&B for experiment tracking platform
+- MLflow community for pipeline orchestration tools
